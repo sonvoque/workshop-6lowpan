@@ -13,5 +13,5 @@ PROJECT_SOURCEFILES += hih6130.c
 APPS += er-coap
 APPS += rest-engine
 
-CONTIKI = ../../contiki/
+CONTIKI = ../contiki/
 include $(CONTIKI)/Makefile.include
