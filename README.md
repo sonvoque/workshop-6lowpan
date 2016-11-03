@@ -173,13 +173,16 @@ in order to include the
     ```shell
     make TARGET=zoul BOARD=firefly hello-world.upload
     ```
-    
+
 ## Connecting the sensor
     
  1. Connect the [HIH 6130](https://www.sparkfun.com/products/11295)
     sensor breakiout board to the Firefly.
  
-  
+## TODO 
+
+ 1. Provide the schematic using Fritzing.
+ 2. Add compiling instructions.
+ 3. Add networking part to documentation. With and without edege
+    router.
  
- 
-    
