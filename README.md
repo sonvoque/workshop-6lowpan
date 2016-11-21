@@ -1,6 +1,7 @@
 # Decentralized architectures & sensor networks in IoT: 6LoWPAN, border routers and gateways
 
 ## Introduction
+## Introduction
 
 This repository contains the code used for the
 [6LoWPAN](https://www.eventbrite.com/e/decentralized-architectures-sensor-networks-in-iot-6lowpan-border-routers-and-gateways-tickets-28534379096)
