@@ -47,7 +47,7 @@
 #define HIH6130_SUCCESS                 0
 #define HIH6130_ERROR                   -1
 /*----------------------------------------------------------------------------*/
-#define HIH6130_ACTIVE                  0
+#define HIH6130_ACTIVE                  SENSORS_ACTIVE
 #define HIH6130_MEASUREMENT_REQUEST     1
 #define HIH6130_SENSOR_READ             2
 /*----------------------------------------------------------------------------*/
