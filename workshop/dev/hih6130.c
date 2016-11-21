@@ -44,6 +44,7 @@
 #include "dev/i2c.h"
 #include "hih6130.h"
 #include "lib/sensors.h"
+
 /*---------------------------------------------------------------------------*/
 #define DEBUG 0
 #if DEBUG
