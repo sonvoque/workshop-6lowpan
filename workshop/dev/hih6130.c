@@ -125,7 +125,7 @@ hih6130_measurement_request(void)
 static int
 value(int type)
 {
-  uint16_t val = HIH6130_ERROR;
+  uint32_t val = HIH6130_ERROR;
 
   if(!enabled) {
     PRINTF("HIH6130: sensor not started\n");
