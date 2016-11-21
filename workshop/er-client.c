@@ -56,27 +56,26 @@
 #define PRINTLLADDR(addr)
 #endif
 
-/* FIXME: This server address is hard-coded for Cooja and link-local for unconnected border router. */
-//#define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xfe80, 0, 0, 0, 0x0212, 0x4b00, 0x060d, 0xb12f)      /* cooja2 */
- #define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 0x1)
-
+/* Define the border router settings */
+#define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 0x1)
 #define LOCAL_PORT      UIP_HTONS(COAP_DEFAULT_PORT + 1)
-//#define REMOTE_PORT     UIP_HTONS(COAP_DEFAULT_PORT)
-//CHRISTOS define custom port
 #define REMOTE_PORT     UIP_HTONS(8181)
-
+/* Interval for setting data to the server */
 #define TOGGLE_INTERVAL 5
+/* Path info and cloud credentials */
+#define URL_PATH "/target"
+#define DEVICE_ID "42beac85-ec65-4e16-9b7a-df4ffa85b17d"
+#define USER_TOKEN "Bearer nlm5mMJNTu6NayCtB7cwU3IGxbOcQI28Iw8k9V7mm6Q42lKnS5QNf11WrrNhgRku"
 
 PROCESS(er_example_client, "Erbium Example Client");
 AUTOSTART_PROCESSES(&er_example_client);
 
 uip_ipaddr_t server_ipaddr;
-static struct etimer et;
+static struct etimer et; 
 
-/* Example URIs that can be queried. */
-#define URL_PATH "/target"
-#define DEVICE_ID "42beac85-ec65-4e16-9b7a-df4ffa85b17d"
-#define USER_TOKEN "Bearer nlm5mMJNTu6NayCtB7cwU3IGxbOcQI28Iw8k9V7mm6Q42lKnS5QNf11WrrNhgRku"
+/* Global variables for reading the sensor */
+uint16_t rh = 0;
+uint16_t temperature = 0;
 
 
 /* This function is will be passed to COAP_BLOCKING_REQUEST() to handle responses. */
@@ -89,10 +88,12 @@ client_chunk_handler(void *response)
 
   printf("|%.*s", len, (char *)chunk);
 }
+
+
 PROCESS_THREAD(er_example_client, ev, data)
 {
   PROCESS_BEGIN();
-
+  /* ACTIVATE the HIH6130 */
   SENSORS_ACTIVATE(hih6130);
 
   static coap_packet_t request[1];      /* This way the packet can be treated as pointer as usual. */
@@ -101,41 +102,58 @@ PROCESS_THREAD(er_example_client, ev, data)
 
   /* receives all CoAP messages */
   coap_init_engine();
-
   etimer_set(&et, TOGGLE_INTERVAL * CLOCK_SECOND);
-
 
   while(1) {
     PROCESS_YIELD();
 
     if(etimer_expired(&et)) {
-      printf("--Toggle timer--\n");
+      printf("--Sending readings...--\n");
         
-        /*********   Get the sensor info  *************/
+      /*********   Get the sensor info  *************/
 
-      uint16_t rh = 0;
-      uint16_t temperature = 0;
-
-      if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {    
+      if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {   
         if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
           rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
           temperature = hih6130.value(HIH6130_VAL_TEMP) /1000 ;
         }
       } 
 
-        printf("%u,%u", rh,temperature);
-        /*************** First message with all the info ************************/
+      /**********************************************/
+
+      printf("%u,%u", rh,temperature); //Debug to console
+
+        /*************** First message with temperature info ************************/
+        
+        /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
+        coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
+        coap_set_header_uri_path(request, URL_PATH);
+        
+        char msg[148];
+        
+        snprintf((char *)msg, REST_MAX_CHUNK_SIZE, "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN,"temperature",temperature);
+
+        coap_set_payload(request, (uint8_t *)msg, sizeof(DEVICE_ID)+sizeof(USER_TOKEN)+sizeof("temperature")+2);
+        
+        PRINT6ADDR(&server_ipaddr);
+        PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
+        
+        COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
+                              client_chunk_handler);
+        /***********************************************************************/
+
+        /*************** Second message with humidity info ************************/
         
         /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
         coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
         coap_set_header_uri_path(request, URL_PATH);
         
         //const char msg[] = "42beac85-ec65-4e16-9b7a-df4ffa85b17d,Bearer nlm5mMJNTu6NayCtB7cwU3IGxbOcQI28Iw8k9V7mm6Q42lKnS5QNf11WrrNhgRku,30,100";
-        char msg[148];
+        char msg2[148];
         
-        snprintf((char *)msg, REST_MAX_CHUNK_SIZE, "%s,%s,%u,%u", DEVICE_ID, USER_TOKEN, temperature,rh);
+        snprintf((char *)msg2, REST_MAX_CHUNK_SIZE, "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN,"humidity",rh);
 
-        coap_set_payload(request, (uint8_t *)msg, sizeof(DEVICE_ID)+sizeof(USER_TOKEN)+6);
+        coap_set_payload(request, (uint8_t *)msg2, sizeof(DEVICE_ID)+sizeof(USER_TOKEN)+sizeof("humidity")+2);
         
         PRINT6ADDR(&server_ipaddr);
         PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
@@ -145,11 +163,9 @@ PROCESS_THREAD(er_example_client, ev, data)
         /***********************************************************************/
 
                 
-        
       printf("\n--Done--\n");
-
+      
       etimer_reset(&et);
-
     }
   }
     
