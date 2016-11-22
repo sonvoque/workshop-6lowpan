@@ -57,6 +57,7 @@
 #endif
 
 
+
 /*
  * Resources to be activated need to be imported through the extern keyword.
  * The build system automatically compiles the resources in the corresponding sub-directory.
@@ -65,7 +66,7 @@ extern resource_t
   res_alarm,
   res_toggle;
 
-/* Include headers and resources for the 'hih6130' sensor */
+/* Include headers and resources for the 'hih6130' sensor. */
 #include "dev/hih6130.h"
 extern resource_t res_hih6130_temp;
 extern resource_t res_hih6130_hum;
@@ -106,14 +107,11 @@ PROCESS_THREAD(er_example_server, ev, data)
   rest_activate_resource(&res_toggle, "actuators/toggle");
 #endif
 
-  /* Set our resources paths and also activate the sensor */
+  /* Set our resources paths and also activate the sensor. */
   rest_activate_resource(&res_hih6130_temp, "sensors/hih6130/temperature");
   rest_activate_resource(&res_hih6130_hum, "sensors/hih6130/humidity");
   SENSORS_ACTIVATE(hih6130);
 
-
-
-  /* Define application-specific events here. */
   while(1) {
     PROCESS_WAIT_EVENT();
 
