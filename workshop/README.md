@@ -8,17 +8,19 @@ Below you can find general info about setting, flashing, using and accessing the
 
 Repositories and libraries must have been set and installed as described [here](https://github.com/relayr/workshop-6lowpan/blob/workshop/README.md).
 
-## Er-server.c
+## er-server.c
 
-This CoAP server allows you to remotely access its resources using REST requests. By default the server has four main paths:
+This CoAP server allows you to remotely access its resources using REST requests. By default the server has the following resources:
     
- 1. **.well-known/core** Access with a GET request. Here all of the mote's resources are advertized
-    
- 2. **actuators/** Usually accessed with POST or PUT requests. Under this path you can find resourses which use the GPIO pins or the LEDs of the device to implement any kind of actuation.
 
- 3. **sensors/** Use GET requests to retrieve sensor readings from resources under the sensor path. 
+| Path 				|Resource   	  |Method  |Description   
+|---					|---			  |---	     |---
+|  |.well-known/core/   |GET     |Provides list of available resources.  
+|sensors/  |hih6130/temperature/</br>hih6130/humidity/ |GET |Returns ambient temperature in Celcius or relative humidity from HIH6130 sensor.
+|actuators/         | toggle/  	  |POST    |Toggles device LED.
+|observables/	      |humidityALERT/ |OBSERVE |Subscribes to resource and gets notified when humidity exceeds a certain level.
+ 
 
- 4. **observables/** Use CoAP OBSERVE requests to subscribe to observable resources and get a notification if a condition is satisfied.
 
 ### Activating resources
  
@@ -29,7 +31,6 @@ This CoAP server allows you to remotely access its resources using REST requests
 rest_init_engine();
 
 /* Set our resources paths and also activate the sensor. */
-
 rest_activate_resource(&res_hih6130_temp, "sensors/hih6130/temperature");
 rest_activate_resource(&res_hih6130_hum, "sensors/hih6130/humidity");
 
@@ -43,11 +44,11 @@ In the *workshop/* directory execute:
 ```shell
 make TARGET=zoul BOARD=firefly er-server.upload
 ```
-Now the mote is accessible from its hard-coded IPv6 address.
+Now the mote is accessible using its hard-coded IPv6 address.
  
  
  
-##Er-client.c
+##er-client.c
  
  The CoAP client is used for sending data to the [relayr.](https://developer.relayr.io) cloud. A loop is triggered periodically and a CoAP message is sent to a predefined server address. In the given example, the client probes the [HIH6130](https://www.sparkfun.com/products/11295) sensor and sends two messages (temperature and humidity) to a remote CoAP server, which is responsible for uploading the data to the cloud.
  
