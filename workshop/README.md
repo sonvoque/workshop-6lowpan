@@ -25,17 +25,16 @@ This CoAP server allows you to remotely access its resources using REST requests
  You can activate or deactivate resources simply by including a function, which binds them with a unique path. Do not forget to also activate any hardware a resource might need. The activation is done just after the REST engine is initialized in the PROCESS: 
  
  ```c
-   /* Initialize the REST engine. */
-  rest_init_engine();
+/* Initialize the REST engine. */
+rest_init_engine();
 
-  /* Set our resources paths and also activate the sensor. */
-  
-  rest_activate_resource(&res_hih6130_temp, "sensors/hih6130/temperature");
-  rest_activate_resource(&res_hih6130_hum, "sensors/hih6130/humidity");
-  
-  /* Activating the HIH6130 sensor. */
-  SENSORS_ACTIVATE(hih6130);
- 
+/* Set our resources paths and also activate the sensor. */
+
+rest_activate_resource(&res_hih6130_temp, "sensors/hih6130/temperature");
+rest_activate_resource(&res_hih6130_hum, "sensors/hih6130/humidity");
+
+/* Activating the HIH6130 sensor. */
+SENSORS_ACTIVATE(hih6130);
  ```
 ### Flashing the server on a Firefly mote
 
@@ -60,19 +59,19 @@ Now the mote is accessible from its hard-coded IPv6 address.
  ```c
 /* Define the border router settings. */
 #define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 0x1)
-#define REMOTE_PORT     UIP_HTONS(8181)
-#define URL_PATH "/target"
+#define REMOTE_PORT     	  UIP_HTONS(8181)
+#define URL_PATH 			  "/target"
  ```
 
  2. Next, specify the credentials in order to successfully connect to the cloud, and choose the time interval in seconds, for probing the data: 
 
  ```c
-	/* Interval for setting data to the server. */
-	#define TOGGLE_INTERVAL 5
-
-	/* Path info and cloud credentials. */
-	#define DEVICE_ID "42beac85-ec65-4e3ee-9b7a-df4ffa85b17d"
-	#define USER_TOKEN "Bearer nlm5mMJNTu6N7mm6Q42lKnS5QNf11WrrNhgRku" 
+ /* Interval for setting data to the server. */
+ #define TOGGLE_INTERVAL 5
+ 
+ /* Path info and cloud credentials. */
+ #define DEVICE_ID "42beac85-ec65-4e3ee-9b7a-df4ffa85b17d"
+ #define USER_TOKEN "Bearer nlm5mMJNTu6N7mm6Q42lKnS5QNf11WrrNhgRku" 
  ```
 
 ###Flashing the client on a Firefly mote
