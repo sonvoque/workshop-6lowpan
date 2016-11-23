@@ -92,4 +92,5 @@ The examples make use of the [Erbium REST engine](http://people.inf.ethz.ch/mkov
 ## TODO
  1. Improve code for extracting temperature and humidity
     values. Organize the code better: .h and .c.
- 2. 
+ 2. Explore RGB LED.
+
