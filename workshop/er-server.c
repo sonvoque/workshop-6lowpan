@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Institute for Pervasive Computing, ETH Zurich
+ *           (c) 2016, relayr GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +31,10 @@
  */
 
 /**
- * \file
- *      Erbium (Er) REST Engine example.
+ *      6LoWPAN workshop CoAP server.
  * \author
- *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
+ *      Christos Zachiotis <christos@relayr.io>
+ *      Antonio P. P. Almeida <appa@perusio.net>
  */
 
 #include <stdio.h>
@@ -42,7 +43,6 @@
 #include "contiki.h"
 #include "contiki-net.h"
 #include "rest-engine.h"
-
 
 #define DEBUG 0
 #if DEBUG
@@ -56,14 +56,12 @@
 #define PRINTLLADDR(addr)
 #endif
 
-
-
 /*
  * Resources to be activated need to be imported through the extern keyword.
  * The build system automatically compiles the resources in the corresponding sub-directory.
  */
 extern resource_t
-  res_alarm,
+res_alarm,
   res_toggle;
 
 /* Include headers and resources for the 'hih6130' sensor. */
@@ -80,19 +78,7 @@ PROCESS_THREAD(er_example_server, ev, data)
 
   PROCESS_PAUSE();
 
-  PRINTF("Starting Erbium Example Server\n");
-
-#ifdef RF_CHANNEL
-  PRINTF("RF channel: %u\n", RF_CHANNEL);
-#endif
-#ifdef IEEE802154_PANID
-  PRINTF("PAN ID: 0x%04X\n", IEEE802154_PANID);
-#endif
-
-  PRINTF("uIP buffer: %u\n", UIP_BUFSIZE);
-  PRINTF("LL header: %u\n", UIP_LLH_LEN);
-  PRINTF("IP+UDP header: %u\n", UIP_IPUDPH_LEN);
-  PRINTF("REST max chunk: %u\n", REST_MAX_CHUNK_SIZE);
+  PRINTF("Starting 6LoWPAN Workshop Server\n");
 
   /* Initialize the REST engine. */
   rest_init_engine();
@@ -102,7 +88,9 @@ PROCESS_THREAD(er_example_server, ev, data)
    * WARNING: Activating twice only means alternate path, not two instances!
    * All static variables are the same for each URI path.
    */
+  /* Enable observable resource. */
   rest_activate_resource(&res_alarm, "observables/humidityALERT");
+  /* Enable onboard LED (actuator). */
 #if PLATFORM_HAS_LEDS
   rest_activate_resource(&res_toggle, "actuators/toggle");
 #endif

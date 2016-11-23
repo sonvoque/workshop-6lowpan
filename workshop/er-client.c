@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Institute for Pervasive Computing, ETH Zurich
+ *           (c) 2016, relayr GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +32,10 @@
 
 /**
  * \file
- *      Erbium (Er) CoAP client.
+ *      6LoWPAN workshop CoAP client.
  * \author
- *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
+ *      Christos Zachiotis <christos@relayr.io>
+ *      Antonio P. P. Almeida <appa@perusio.net>
  */
 
 #include <stdio.h>
@@ -60,114 +62,129 @@
 #define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 0x1)
 #define LOCAL_PORT      UIP_HTONS(COAP_DEFAULT_PORT + 1)
 #define REMOTE_PORT     UIP_HTONS(8181)
-/* Interval for setting data to the server. */
+/* Time factor for sending data to the server. This will be used for
+   initializing the timer and it multiplies a time unit. */
 #define TOGGLE_INTERVAL 5
 /* Path info and cloud credentials. */
 #define URL_PATH "/target"
 #define DEVICE_ID "42beac85-ec65-4e16-9b7a-df4ffa85b17d"
 #define USER_TOKEN "Bearer nlm5mMJNTu6NayCtB7cwU3IGxbOcQI28Iw8k9V7mm6Q42lKnS5QNf11WrrNhgRku"
 
-PROCESS(er_example_client, "Erbium Example Client");
+      PROCESS(er_example_client, "CoAP Client Workshop");
 AUTOSTART_PROCESSES(&er_example_client);
 
 uip_ipaddr_t server_ipaddr;
-static struct etimer et; 
+
+/* Event timer structure. */
+static struct etimer et;
 
 /* Global variables for reading the sensor. */
-uint16_t rh = 0;
-uint16_t temperature = 0;
-
+static uint16_t rh = 0;
+static uint16_t temperature = 0;
 
 /* This function is will be passed to COAP_BLOCKING_REQUEST() to handle responses. */
 void
 client_chunk_handler(void *response)
 {
   const uint8_t *chunk;
-
   int len = coap_get_payload(response, &chunk);
-
   printf("|%.*s", len, (char *)chunk);
 }
-
 
 PROCESS_THREAD(er_example_client, ev, data)
 {
   PROCESS_BEGIN();
-  /* ACTIVATE the HIH6130. */
+  /* Activate the HIH6130 sensor. */
   SENSORS_ACTIVATE(hih6130);
-
+  /* Check what this is exactly! */
   static coap_packet_t request[1];      /* This way the packet can be treated as pointer as usual. */
 
   SERVER_NODE(&server_ipaddr);
 
-  /* receives all CoAP messages. */
+  /* Receives all CoAP messages. */
   coap_init_engine();
+
+  /* Set the event timer interval. */
   etimer_set(&et, TOGGLE_INTERVAL * CLOCK_SECOND);
 
+  /* Infinite loop running the main logic. */
   while(1) {
+    /* Wait on any event. IN this case the event will be the timer expiration: TOGGLE_INTERVAL seconds. */
     PROCESS_YIELD();
-
+    /*  The timer fired up an event. Control is returned here. */
     if(etimer_expired(&et)) {
       printf("--Sending readings...--\n");
-        
-      /*********   Get the sensor info.  *************/
-
-      if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {   
+      /* Setup the I2C bus communication for the sensor and request
+         the value(s). */
+      if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
         if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
+          /* Quick & dirty rounding of the values: convert to integer. */
           rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
           temperature = hih6130.value(HIH6130_VAL_TEMP) /1000 ;
         }
-      } 
+      }
 
-      /**********************************************/
+#ifdef DEBUG
+      printf("%u,%u", rh, temperature);
+#endif
 
-      printf("%u,%u", rh,temperature); //Debug to console
+      /* Prepare request, TID is set by COAP_BLOCKING_REQUEST(). */
+      coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
+      coap_set_header_uri_path(request, URL_PATH);
+      /* Message buffer for temperature. */
+      char temp_msg[REST_MAX_CHUNK_SIZE];
+      /* Setting the buffer with the temperature value. */
+      snprintf((char *) temp_msg,
+               REST_MAX_CHUNK_SIZE,
+               "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN,
+               "temperature", temperature);
+      /* Set the CoAP payload using the message buffer above. */
+      coap_set_payload(request,
+                       (uint8_t *) msg,
+                       sizeof(DEVICE_ID)
+                       +
+                       sizeof(USER_TOKEN)
+                       +
+                       sizeof("temperature") + 2);
 
-        /*************** First message with temperature info. ************************/
-        
-        /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
-        coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
-        coap_set_header_uri_path(request, URL_PATH);
-        
-        char msg[148];
-        
-        snprintf((char *)msg, REST_MAX_CHUNK_SIZE, "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN,"temperature",temperature);
+      /* Debugging messages. */
+      PRINT6ADDR(&server_ipaddr);
+      PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
+      /*  Sends the CoAP client request. */
+      COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
+                            client_chunk_handler);
 
-        coap_set_payload(request, (uint8_t *)msg, sizeof(DEVICE_ID)+sizeof(USER_TOKEN)+sizeof("temperature")+2);
-        
-        PRINT6ADDR(&server_ipaddr);
-        PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
-        
-        COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
-                              client_chunk_handler);
-        /***********************************************************************/
+      /* Prepare request, TID is set by COAP_BLOCKING_REQUEST(). */
+      coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
+      coap_set_header_uri_path(request, URL_PATH);
+      /* Message buffer for humidity. */
+      char hum_msg[REST_MAX_CHUNK_SIZE];
+      /* Setting the buffer to the humidity value. */
+      snprintf((char *) hum_msg,
+               REST_MAX_CHUNK_SIZE,
+               "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN, "humidity", rh);
 
-        /*************** Second message with humidity info. ************************/
-        
-        /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
-        coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
-        coap_set_header_uri_path(request, URL_PATH);
-        
-        char msg2[148];
-        
-        snprintf((char *)msg2, REST_MAX_CHUNK_SIZE, "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN,"humidity",rh);
+      coap_set_payload(request, (uint8_t *) hum_msg,
+                       sizeof(DEVICE_ID)
+                       +
+                       sizeof(USER_TOKEN)
+                       +
+                       sizeof("humidity")
+                       +
+                       2);
+      /* Debugging messages. */
+      PRINT6ADDR(&server_ipaddr);
+      PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
+      /* Sending the client request. */
+      COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
+                            client_chunk_handler);
 
-        coap_set_payload(request, (uint8_t *)msg2, sizeof(DEVICE_ID)+sizeof(USER_TOKEN)+sizeof("humidity")+2);
-        
-        PRINT6ADDR(&server_ipaddr);
-        PRINTF(" : %u\n", UIP_HTONS(REMOTE_PORT));
-        
-        COAP_BLOCKING_REQUEST(&server_ipaddr, REMOTE_PORT, request,
-                              client_chunk_handler);
-        /***********************************************************************/
-
-                
       printf("\n--Done--\n");
-      
+      /*  Resetting the timer. Start counting until we reach
+          TOGGLE_INTERVAL seconds again. */
       etimer_reset(&et);
     }
   }
-    
 
   PROCESS_END();
 }

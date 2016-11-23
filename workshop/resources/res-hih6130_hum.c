@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2014, Nimbus Centre for Embedded Systems Research, Cork Institute of Technology.
+ *           (c) 2016, relayr GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +32,10 @@
 
 /**
  * \file
- *      HIH6130 Sensor Resource
- *
- *      Methods: GET
- *      Comments: Returns the Hih6130 humidity value     
+ *      6LoWPAN workshop CoAP HIH6130 sensor resource (humidity).
+ * \author
+ *      Christos Zachiotis <christos@relayr.io>
+ *      Antonio P. P. Almeida <appa@perusio.net>
  */
 
 #include "contiki.h"
@@ -42,9 +43,10 @@
 #include "rest-engine.h"
 #include "dev/hih6130.h"
 
+/* GET request handler (prototype). */
 static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
-/* Get Method Example. Returns the reading from humidity sensor. */
+/* Defining the humidity resource. */
 RESOURCE(res_hih6130_hum,
          "title=\"Humidity\";rt=\"HIH6130\"",
          res_get_handler,
@@ -52,40 +54,43 @@ RESOURCE(res_hih6130_hum,
          NULL,
          NULL);
 
+/* GET request handler. */
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
 
   uint16_t rh = 0;
-
-  if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {    
-      if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
-        rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
-      }
-    } 
+  /* Probing and reading the sensor humidity value. */
+  if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
+    if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
+      /*  Quick and dirty rounding: convert to an integer. */
+      rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
+    }
+  }
 
   unsigned int accept = -1;
+  /* Parse the Accept header. */
   REST.get_header_accept(request, &accept);
-
+  /* Branching based on the response type. */
   if(accept == -1 || accept == REST.type.TEXT_PLAIN) {
     REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%u", rh);
+    snprintf((char *) buffer, REST_MAX_CHUNK_SIZE, "%u", rh);
 
-    REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
+    REST.set_response_payload(response, (uint8_t *) buffer, strlen((char *) buffer));
   } else if(accept == REST.type.APPLICATION_XML) {
     REST.set_header_content_type(response, REST.type.APPLICATION_XML);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "<Humidity=\"%u\"/>",rh);
+    snprintf((char *) buffer, REST_MAX_CHUNK_SIZE, "<Humidity=\"%u\"/>",rh);
 
-    REST.set_response_payload(response, buffer, strlen((char *)buffer));
+    REST.set_response_payload(response, buffer, strlen((char *) buffer));
   } else if(accept == REST.type.APPLICATION_JSON) {
     REST.set_header_content_type(response, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'Hih6130':{'Humidity':%u}}",rh);
+    snprintf((char *) buffer, REST_MAX_CHUNK_SIZE, "{'HiH6130':{'Humidity':%u}}",rh);
 
-    REST.set_response_payload(response, buffer, strlen((char *)buffer));
+    REST.set_response_payload(response, buffer, strlen((char *) buffer));
   } else {
     REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
+    /* Error message when the requested Content-Type is not supported. */
     const char *msg = "Supporting content-types text/plain, application/xml, and application/json";
     REST.set_response_payload(response, msg, strlen(msg));
   }
 }
-

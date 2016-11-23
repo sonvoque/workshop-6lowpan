@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Institute for Pervasive Computing, ETH Zurich
+ *           (c) 2016, relayr GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +32,10 @@
 
 /**
  * \file
- *      Observable resource
+ *      6LoWPAN workshop CoAP observable resource.
  * \author
- *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
+ *      Christos Zachiotis <christos@relayr.io>
+ *      Antonio P. P. Almeida <appa@perusio.net>
  */
 
 #include <string.h>
@@ -41,9 +43,14 @@
 #include "er-coap.h"
 #include "dev/hih6130.h"
 
-static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
-static void res_periodic_handler(void);
+/* Value of humidity that triggers an update of the observable resource. */
+#define HUMIDITY_DELTA 50
 
+/* GET request handler. */
+static void res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
+/* Recurring handler that  checks if the resource value changed. */
+static void res_periodic_handler(void);
+/* Setup the periodic resource for humidity. */
 PERIODIC_RESOURCE(res_alarm,
                   "title=\"Humidity Alert\";obs",
                   res_get_handler,
@@ -54,8 +61,9 @@ PERIODIC_RESOURCE(res_alarm,
                   res_periodic_handler);
 
 /*
- * Use local resource state that is accessed by res_get_handler() and altered by res_periodic_handler() or PUT or POST.
- */
+ * Use local resource state that is accessed by res_get_handler() and
+ altered by res_periodic_handler() or PUT or POST.
+*/
 static uint16_t rh = 0;
 
 static void
@@ -67,29 +75,36 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
    * This would be a TODO in the corresponding files in contiki/apps/erbium/!
    */
   REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
+  /* Set Max-Age header (CoAP option). */
   REST.set_header_max_age(response, res_alarm.periodic->period / CLOCK_SECOND);
-  REST.set_response_payload(response, buffer, snprintf((char *)buffer, preferred_size, "Warning! Humidity is now %u percent", rh));
-
+  /* Set the payload. */
+  REST.set_response_payload(response, buffer,
+                            snprintf((char *) buffer,
+                                     preferred_size,
+                                     "Warning! Humidity is now %u percent",
+                                     rh));
   /* The REST.subscription_handler() will be called for observable resources by the REST framework. */
 }
+
 /*
- * Additionally, a handler function named [resource name]_handler must be implemented for each PERIODIC_RESOURCE.
+ * Additionally, a handler function named [resource name]
+ * _handler must be implemented for each PERIODIC_RESOURCE.
  * It will be called by the REST manager process with the defined period.
  */
 static void
 res_periodic_handler()
 {
-  /* Periodically sampling the sensor and check humidity */
-  
-  if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {    
-      if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
-        rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
-      }
-    } 
-
-  /* Usually a condition is defined under with subscribers are notified, e.g., large enough delta in sensor reading. */
-  if(rh > 50) {
-    /* Notify the registered observers which will trigger the res_get_handler to create the response. */
+  /* Periodically sampling the sensor and check humidity. */
+  if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
+    if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
+      rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
+    }
+  }
+  /* Usually a condition is defined under with subscribers are
+     notified, e.g., large enough delta in sensor reading. */
+  if(rh > HUMIDITY_DELTA) {
+    /* Notify the registered observers which will trigger the
+       res_get_handler to create the response. */
     REST.notify_subscribers(&res_alarm);
   }
 }

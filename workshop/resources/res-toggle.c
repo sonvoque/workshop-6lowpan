@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Institute for Pervasive Computing, ETH Zurich
+ *           (c) 2016, relayr GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,9 +32,10 @@
 
 /**
  * \file
- *      Example resource
+ *      6LoWPAN workshop actuator resource.
  * \author
- *      Matthias Kovatsch <kovatsch@inf.ethz.ch>
+ *      Christos Zachiotis <christos@relayr.io>
+ *      Antonio P. P. Almeida <appa@perusio.net>
  */
 
 #include "contiki.h"
@@ -47,13 +49,13 @@
 
 static void res_post_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset);
 
-/* A simple actuator example. Toggles the red led */
+/* A simple actuator example. Toggles the RGB LED. */
 RESOURCE(res_toggle,
-         "title=\"Red LED\";rt=\"Control\"",
-         NULL,
+         "title=\"RGB LED\";rt=\"Control\"",
+         NULL, // GET
          res_post_handler,
-         NULL,
-         NULL);
+         NULL, // PUT
+         NULL); // DELETE
 
 static void
 res_post_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)

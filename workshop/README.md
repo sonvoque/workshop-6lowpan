@@ -89,4 +89,7 @@ More info on [CoAP](http://coap.technology), [zolertia firefly](https://github.c
 
 The examples make use of the [Erbium REST engine](http://people.inf.ethz.ch/mkovatsc/erbium.php).
 
- 
+## TODO
+ 1. Improve code for extracting temperature and humidity
+    values. Organize the code better: .h and .c.
+ 2. 
