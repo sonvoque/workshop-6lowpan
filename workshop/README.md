@@ -23,10 +23,11 @@ REST requests. By default the server has the following resources:
 
 | Path |  Resource   	     | Method  | Description 
 |---   |---			         |---	   |---
-|      | `.well-known/core/` | `GET`     | Provides list of available resources.
-| `sensors/`    | `hih6130/temperature/`</br>`hih6130/humidity`/ |GET |Returns ambient temperature in Celcius or relative humidity from HIH6130 sensor.
-| `actuators/`  | `toggle/`  	  |`POST`    |Toggles device LED (on/off).
-| `observables/`| `humidityALERT`/ |`OBSERVE` |Subscribes to resource and gets notified when humidity exceeds a certain level.
+|      | `.well-known/core/` | `GET`   | Provides list of available resources.
+| `sensors/`    | `hih6130/temperature/`</br>`hih6130/humidity`/ | `GET` | Returns ambient temperature in Celsius and relative humidity
+from the HIH6130 sensor.
+| `actuators/`  | `toggle/`  	  | `POST`    | Toggles device LED (on/off).
+| `observables/`| `humidityALERT`/ | `OBSERVE` | Subscribes to resource and gets notified when humidity exceeds a certain level.
  
 
 ### Activating resources
@@ -114,5 +115,14 @@ Additional information on some of the topics addressed in the workshop.
 
  1. Improve code for extracting temperature and humidity
     values. Organize the code better: .h and .c.
- 2. Explore RGB LED.
-
+ 2. Implement [RPL](https://tools.ietf.org/html/rfc6550) demo to
+    explore routing and network topologies for constrained devices.
+ 3. Implement [CBOR](http://cbor.io) as the data format that is most
+    appropriate for constrained devices.
+ 4. Implement
+    [SenML](https://datatracker.ietf.org/doc/draft-ietf-core-senml)
+    as the proper way to use JSON with constrained devices.
+ 5. Experiment with radio range using better antennas then the simple
+    whip.  Something like this
+    [Yagi](https://www.alibaba.com/product-detail/Gold-Supplier-16dbi-3g-yagi-antenna_60506856488.html).
+ 6. Experiment with battery based power supply and deep sleep. 
