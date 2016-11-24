@@ -65,13 +65,14 @@
 /* Time factor for sending data to the server. This will be used for
    initializing the timer and it multiplies a time unit. */
 #define TOGGLE_INTERVAL 5
-/* Path info and cloud credentials. */
+/* Path info. */
 #define URL_PATH "/target"
-#define DEVICE_ID "42beac85-ec65-4e16-9b7a-df4ffa85b17d"
-#define USER_TOKEN "Bearer nlm5mMJNTu6NayCtB7cwU3IGxbOcQI28Iw8k9V7mm6Q42lKnS5QNf11WrrNhgRku"
+/* Credentials obtained from the dashboard. */
+#define DEVICE_ID "<Your device ID here>"
+#define USER_TOKEN "<Your token here>"
 
-PROCESS(er_example_client, "CoAP Client Workshop");
-AUTOSTART_PROCESSES(&er_example_client);
+PROCESS(er_client, "CoAP Client Workshop");
+AUTOSTART_PROCESSES(&er_client);
 
 uip_ipaddr_t server_ipaddr;
 
@@ -90,7 +91,7 @@ client_chunk_handler(void *response)
   int len = coap_get_payload(response, &chunk);
   printf("|%.*s", len, (char *)chunk);
 }
-PROCESS_THREAD(er_example_client, ev, data)
+PROCESS_THREAD(er_client, ev, data)
 {
   PROCESS_BEGIN();
   /* Activate the HIH6130 sensor. */
