@@ -4,7 +4,7 @@
 
 This repository contains the code used for the
 [6LoWPAN](https://www.eventbrite.com/e/decentralized-architectures-sensor-networks-in-iot-6lowpan-border-routers-and-gateways-tickets-28534379096)
-workshop [relayr](https://).
+workshop by [relayr](https://realyr.io).
 
 ## Requirements
 
@@ -25,12 +25,12 @@ Mint, etc.) these are the steps.
  apt-get install gcc-arm-none-eabi libnewlib-arm-none-eabi
  
  ```
-  3. Get git:
+ 3. Get git:
  ```shell
  apt-get git
  
  ```
-  4. See if have permissions to access serial devices:
+ 4. See if have permissions to access serial devices:
  ```shell
  groups | grep dialout
  ``` 
@@ -43,9 +43,8 @@ Mint, etc.) these are the steps.
     where `<username>` is your username. You have to **logout** and
     **login** again for the change to take effect.
     
-  5. Done. 
-  
-  
+ 5. Done. 
+    
 ### Mac Os X Setup
   
  1. The first thing you'll need is the `gcc-arm-embedded` compiler.
@@ -174,15 +173,9 @@ in order to include the
     make TARGET=zoul BOARD=firefly er-server.upload
     ```
 
-## Connecting the sensor
-    
- 1. Connect the [HIH 6130](https://www.sparkfun.com/products/11295)
-    sensor breakiout board to the Firefly.
- 
-## TODO 
+## Using the code examples
 
- 1. Provide the schematic using Fritzing.
- 2. Add compiling instructions.
- 3. Add networking part to documentation. With and without edege
-    router.
- 
+All the code examples are in the `workshop` directory. The
+instructions on how to use them are on the
+[README](https://github.com/relayr/workshop-6lowpan/blob/master/workshop/README.md).
+

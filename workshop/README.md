@@ -3,11 +3,14 @@
 ## Introduction
 
 Below you can find general info about setting, flashing, using and
+accessing the CoAP server and client implementations used in the workshop.
 
-    
+## Hardware used
 
-accessing the CoAP server and client which are implemented for use in
-this workshop
+ 1. [Zolertia Firefly](zolertia.io/product/hardware/firefly): the
+    sensor node.
+ 2. [HIH 6130](https://www.sparkfun.com/products/11295) breakout
+    board: the sensor (temperature + humidity).
 
 ## Requirements
 
