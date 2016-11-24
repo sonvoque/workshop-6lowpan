@@ -111,13 +111,13 @@ In the `workshop` directory:
    
  * For compiling issue the command:
 ```shell
-    make TARGET=zoul BOARD=firefly er-client
+make TARGET=zoul BOARD=firefly er-client
 ```
  
  * For uploading the code: 
 
 ```shell
- make TARGET=zoul BOARD=firefly er-client.upload
+make TARGET=zoul BOARD=firefly er-client.upload
 ``` 
 
 ## References
