@@ -140,7 +140,7 @@ PROCESS_THREAD(er_client, ev, data)
                "temperature", temperature);
       /* Set the CoAP payload using the message buffer above. */
       coap_set_payload(request,
-                       (uint8_t *)msg,
+                       (uint8_t *)temp_msg,
                        sizeof(DEVICE_ID)
                        +
                        sizeof(USER_TOKEN)
