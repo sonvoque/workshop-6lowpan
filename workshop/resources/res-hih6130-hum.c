@@ -64,7 +64,7 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
     if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
       /*  Quick and dirty rounding: convert to an integer. */
-      rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
+      rh = hih6130.value(HIH6130_VAL_HUMIDITY) / 1000;
     }
   }
 
@@ -74,19 +74,19 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   /* Branching based on the response type. */
   if(accept == -1 || accept == REST.type.TEXT_PLAIN) {
     REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
-    snprintf((char *) buffer, REST_MAX_CHUNK_SIZE, "%u", rh);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%u", rh);
 
-    REST.set_response_payload(response, (uint8_t *) buffer, strlen((char *) buffer));
+    REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_XML) {
     REST.set_header_content_type(response, REST.type.APPLICATION_XML);
-    snprintf((char *) buffer, REST_MAX_CHUNK_SIZE, "<Humidity=\"%u\"/>",rh);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "<Humidity=\"%u\"/>", rh);
 
-    REST.set_response_payload(response, buffer, strlen((char *) buffer));
+    REST.set_response_payload(response, buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON) {
     REST.set_header_content_type(response, REST.type.APPLICATION_JSON);
-    snprintf((char *) buffer, REST_MAX_CHUNK_SIZE, "{'HiH6130':{'Humidity':%u}}",rh);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'HiH6130':{'Humidity':%u}}", rh);
 
-    REST.set_response_payload(response, buffer, strlen((char *) buffer));
+    REST.set_response_payload(response, buffer, strlen((char *)buffer));
   } else {
     REST.set_response_status(response, REST.status.NOT_ACCEPTABLE);
     /* Error message when the requested Content-Type is not supported. */

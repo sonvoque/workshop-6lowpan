@@ -70,7 +70,7 @@
 #define DEVICE_ID "42beac85-ec65-4e16-9b7a-df4ffa85b17d"
 #define USER_TOKEN "Bearer nlm5mMJNTu6NayCtB7cwU3IGxbOcQI28Iw8k9V7mm6Q42lKnS5QNf11WrrNhgRku"
 
-      PROCESS(er_example_client, "CoAP Client Workshop");
+PROCESS(er_example_client, "CoAP Client Workshop");
 AUTOSTART_PROCESSES(&er_example_client);
 
 uip_ipaddr_t server_ipaddr;
@@ -90,7 +90,6 @@ client_chunk_handler(void *response)
   int len = coap_get_payload(response, &chunk);
   printf("|%.*s", len, (char *)chunk);
 }
-
 PROCESS_THREAD(er_example_client, ev, data)
 {
   PROCESS_BEGIN();
@@ -119,8 +118,8 @@ PROCESS_THREAD(er_example_client, ev, data)
       if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
         if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
           /* Quick & dirty rounding of the values: convert to integer. */
-          rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
-          temperature = hih6130.value(HIH6130_VAL_TEMP) /1000 ;
+          rh = hih6130.value(HIH6130_VAL_HUMIDITY) / 1000;
+          temperature = hih6130.value(HIH6130_VAL_TEMP) / 1000;
         }
       }
 
@@ -134,13 +133,13 @@ PROCESS_THREAD(er_example_client, ev, data)
       /* Message buffer for temperature. */
       char temp_msg[REST_MAX_CHUNK_SIZE];
       /* Setting the buffer with the temperature value. */
-      snprintf((char *) temp_msg,
+      snprintf((char *)temp_msg,
                REST_MAX_CHUNK_SIZE,
                "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN,
                "temperature", temperature);
       /* Set the CoAP payload using the message buffer above. */
       coap_set_payload(request,
-                       (uint8_t *) msg,
+                       (uint8_t *)msg,
                        sizeof(DEVICE_ID)
                        +
                        sizeof(USER_TOKEN)
@@ -160,11 +159,11 @@ PROCESS_THREAD(er_example_client, ev, data)
       /* Message buffer for humidity. */
       char hum_msg[REST_MAX_CHUNK_SIZE];
       /* Setting the buffer to the humidity value. */
-      snprintf((char *) hum_msg,
+      snprintf((char *)hum_msg,
                REST_MAX_CHUNK_SIZE,
                "%s,%s,%s,%u", DEVICE_ID, USER_TOKEN, "humidity", rh);
 
-      coap_set_payload(request, (uint8_t *) hum_msg,
+      coap_set_payload(request, (uint8_t *)hum_msg,
                        sizeof(DEVICE_ID)
                        +
                        sizeof(USER_TOKEN)

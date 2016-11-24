@@ -61,7 +61,7 @@
  * The build system automatically compiles the resources in the corresponding sub-directory.
  */
 extern resource_t
-res_alarm,
+  res_alarm,
   res_toggle;
 
 /* Include headers and resources for the 'hih6130' sensor. */
@@ -102,7 +102,6 @@ PROCESS_THREAD(er_example_server, ev, data)
 
   while(1) {
     PROCESS_WAIT_EVENT();
-
   }                             /* while (1) */
 
   PROCESS_END();

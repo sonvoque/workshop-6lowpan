@@ -62,8 +62,8 @@ PERIODIC_RESOURCE(res_alarm,
 
 /*
  * Use local resource state that is accessed by res_get_handler() and
- altered by res_periodic_handler() or PUT or POST.
-*/
+   altered by res_periodic_handler() or PUT or POST.
+ */
 static uint16_t rh = 0;
 
 static void
@@ -79,13 +79,12 @@ res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferr
   REST.set_header_max_age(response, res_alarm.periodic->period / CLOCK_SECOND);
   /* Set the payload. */
   REST.set_response_payload(response, buffer,
-                            snprintf((char *) buffer,
+                            snprintf((char *)buffer,
                                      preferred_size,
                                      "Warning! Humidity is now %u percent",
                                      rh));
   /* The REST.subscription_handler() will be called for observable resources by the REST framework. */
 }
-
 /*
  * Additionally, a handler function named [resource name]
  * _handler must be implemented for each PERIODIC_RESOURCE.
@@ -97,7 +96,7 @@ res_periodic_handler()
   /* Periodically sampling the sensor and check humidity. */
   if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
     if(hih6130.configure(HIH6130_SENSOR_READ, 0) >= 0) {
-      rh = hih6130.value(HIH6130_VAL_HUMIDITY) /1000 ;
+      rh = hih6130.value(HIH6130_VAL_HUMIDITY) / 1000;
     }
   }
   /* Usually a condition is defined under with subscribers are
