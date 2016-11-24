@@ -50,13 +50,19 @@ rest_activate_resource(&res_hih6130_hum, "sensors/hih6130/humidity");
 /* Activating the HIH6130 sensor. */
 SENSORS_ACTIVATE(hih6130);
  ```
-### Flashing the server on a Firefly mote
+### Compiling & Flashing the server on the Firefly
 
-In the `workshop` directory execute:
+In the `workshop` directory:
    
-```shell
-make TARGET=zoul BOARD=firefly er-server.upload
-```
+ 1. For compiling issue the command:
+ ```shell
+  make TARGET=zoul BOARD=firefly er-server
+  ```
+ 2. For uploading the code: 
+ ```shell
+ make TARGET=zoul BOARD=firefly er-server.upload
+ ```
+
 Now the mote is accessible using its IPv6 address.
  
 ## Client: `er-client.c`
@@ -98,12 +104,19 @@ Inside the code many variables must be set before flashing the code:
 
 ### Flashing the client on a Firefly mote
 
-Again, in the `workshop/` directory, execute:
+### Compiling & Flashing the server on the Firefly
 
-```shell
-make TARGET=zoul BOARD=firefly er-client.upload
-```
+In the `workshop` directory:
    
+ 1. For compiling issue the command:
+ ```shell
+  make TARGET=zoul BOARD=firefly er-server
+  ```
+ 2. For uploading the code: 
+ ```shell
+ make TARGET=zoul BOARD=firefly er-client.upload
+ ``` 
+
 ## References
 
 Additional information on some of the topics addressed in the workshop.

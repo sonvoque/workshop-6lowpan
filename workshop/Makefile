@@ -1,5 +1,5 @@
-all: er-example-server er-example-client
-# use target "er-plugtest-server" explicitly when requried 
+all: er-server er-client
+# use target "er-plugtest-server" explicitly when required 
 
 CONTIKI=../contiki
 
@@ -23,7 +23,6 @@ PROJECT_SOURCEFILES += $(REST_RESOURCES_FILES)
 #Add these two lines for workshop purposes
 PROJECTDIRS += ./dev
 PROJECT_SOURCEFILES += hih6130.c
-
 
 # linker optimizations
 SMALL=1
