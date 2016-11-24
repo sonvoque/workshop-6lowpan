@@ -27,10 +27,9 @@ REST requests. By default the server has the following resources:
 | Path |  Resource   	     | Method  | Description 
 |---   |---			         |---	   |---
 |      | `.well-known/core/` | `GET`   | Provides list of available resources.
-| `sensors/`    | `hih6130/temperature/`</br>`hih6130/humidity`/ | `GET` | Returns ambient temperature in Celsius and relative humidity
-from the HIH6130 sensor.
+| `sensors/`    | `hih6130/temperature/`</br>`hih6130/humidity/` | `GET` | Returns ambient temperature in Celsius and relative humidity from the HIH6130 sensor.
 | `actuators/`  | `toggle/`  	  | `POST`    | Toggles device LED (on/off).
-| `observables/`| `humidityALERT`/ | `OBSERVE` | Subscribes to resource and gets notified when humidity exceeds a certain level.
+| `observables/`| `humidityALERT/` | `OBSERVE` | Subscribes to resource and gets notified when humidity exceeds a certain level.
  
 
 ### Activating resources
@@ -111,7 +110,7 @@ Additional information on some of the topics addressed in the workshop.
 
  * [CoAP](http://coap.technology).
  * [Zolertia Firefly](https://github.com/Zolertia/Resources/wiki/Firefly).
- * [relayr. cloud](http://docs.relayr.io).
+ * [relayr cloud](http://docs.relayr.io).
  * [Erbium REST engine](http://people.inf.ethz.ch/mkovatsc/erbium.php).
 
 ## TODO
