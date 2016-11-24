@@ -54,14 +54,15 @@ SENSORS_ACTIVATE(hih6130);
 
 In the `workshop` directory:
    
- 1. For compiling issue the command:
- ```shell
-  make TARGET=zoul BOARD=firefly er-server
-  ```
- 2. For uploading the code: 
- ```shell
+ * For compiling issue the command:
+```shell
+ make TARGET=zoul BOARD=firefly er-server
+```
+
+ * For uploading the code issue the command: 
+```shell
  make TARGET=zoul BOARD=firefly er-server.upload
- ```
+```
 
 Now the mote is accessible using its IPv6 address.
  
@@ -108,14 +109,16 @@ Inside the code many variables must be set before flashing the code:
 
 In the `workshop` directory:
    
- 1. For compiling issue the command:
- ```shell
-  make TARGET=zoul BOARD=firefly er-server
-  ```
- 2. For uploading the code: 
- ```shell
+ * For compiling issue the command:
+```shell
+    make TARGET=zoul BOARD=firefly er-client
+```
+ 
+ * For uploading the code: 
+
+```shell
  make TARGET=zoul BOARD=firefly er-client.upload
- ``` 
+``` 
 
 ## References
 
