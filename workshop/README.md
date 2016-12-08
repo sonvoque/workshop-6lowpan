@@ -11,6 +11,7 @@ accessing the CoAP server and client implementations used in the workshop.
     sensor node.
  2. [HIH 6130](https://www.sparkfun.com/products/11295) breakout
     board: the sensor (temperature + humidity).
+ 3. [AM 2315]() I<sup>2</sup>C sensor (temperature + humidity). (Optional; can be used in client example)
 
 ## Requirements
 
@@ -111,14 +112,16 @@ In the `workshop` directory:
    
  * For compiling issue the command:
 ```shell
-make TARGET=zoul BOARD=firefly er-client
+make TARGET=zoul BOARD=firefly SENSOR=hih6130 er-client
 ```
  
  * For uploading the code: 
 
 ```shell
-make TARGET=zoul BOARD=firefly er-client.upload
+make TARGET=zoul BOARD=firefly SENSOR=hih6130 er-client.upload
 ``` 
+
+ * Optionally, the AM2315 sensor can be used by setting the compile flag to ```SENSOR=am2315```
 
 ## References
 
