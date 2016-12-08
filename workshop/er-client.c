@@ -45,6 +45,7 @@
 #include "contiki-net.h"
 #include "er-coap-engine.h"
 #include "dev/hih6130.h"
+#include "dev/am2315.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -58,18 +59,20 @@
 #define PRINTLLADDR(addr)
 #endif
 
+
+
 /* Define the border router settings. */
 #define SERVER_NODE(ipaddr)   uip_ip6addr(ipaddr, 0xfd00, 0, 0, 0, 0, 0, 0, 0x1)
 #define LOCAL_PORT      UIP_HTONS(COAP_DEFAULT_PORT + 1)
 #define REMOTE_PORT     UIP_HTONS(8181)
 /* Time factor for sending data to the server. This will be used for
    initializing the timer and it multiplies a time unit. */
-#define TOGGLE_INTERVAL 5
+#define TOGGLE_INTERVAL 2
 /* Path info. */
 #define URL_PATH "/target"
 /* Credentials obtained from the dashboard. */
-#define DEVICE_ID "<Your device ID here>"
-#define USER_TOKEN "<Your token here>"
+#define DEVICE_ID "1f7140cb-7ece-4294-8f23-8a0da0736f35"
+#define USER_TOKEN "Bearer mwVvRmypMg3O5CO6ffx9OzbtmzZFxP8tK2LZYtimjqTecI7k7AjgAqODFhW5nHbp"
 
 PROCESS(er_client, "CoAP Client Workshop");
 AUTOSTART_PROCESSES(&er_client);
@@ -78,10 +81,12 @@ uip_ipaddr_t server_ipaddr;
 
 /* Event timer structure. */
 static struct etimer et;
+static struct etimer sensor_et;
 
 /* Global variables for reading the sensor. */
 static uint16_t rh = 0;
 static uint16_t temperature = 0;
+
 
 /* This function is will be passed to COAP_BLOCKING_REQUEST() to handle responses. */
 void
@@ -94,8 +99,15 @@ client_chunk_handler(void *response)
 PROCESS_THREAD(er_client, ev, data)
 {
   PROCESS_BEGIN();
-  /* Activate the HIH6130 sensor. */
+
+#ifdef AM2315
+  /* Activate the sensor. */
+  SENSORS_ACTIVATE(am2315);
+#else 
+  /* Activate the default sensor. */
   SENSORS_ACTIVATE(hih6130);
+#endif
+
   /* Check what this is exactly! */
   static coap_packet_t request[1];      /* This way the packet can be treated as pointer as usual. */
 
@@ -114,6 +126,8 @@ PROCESS_THREAD(er_client, ev, data)
     /*  The timer fired up an event. Control is returned here. */
     if(etimer_expired(&et)) {
       printf("--Sending readings...--\n");
+
+#ifdef HIH6130
       /* Setup the I2C bus communication for the sensor and request
          the value(s). */
       if(hih6130.configure(HIH6130_MEASUREMENT_REQUEST, 0) >= 0) {
@@ -123,10 +137,21 @@ PROCESS_THREAD(er_client, ev, data)
           temperature = hih6130.value(HIH6130_VAL_TEMP) / 1000;
         }
       }
-
-#ifdef DEBUG
-      printf("%u,%u", rh, temperature);
 #endif
+
+#ifdef AM2315
+          /* Convert to integer. Sensor gives the reading x10 */
+          rh = am2315.value(AM2315_VAL_HUM) / 10;
+          /* Introducing a 100ms delay to procceed reading. */
+          etimer_set(&sensor_et, CLOCK_SECOND/10);
+          PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&sensor_et));
+          /* Reading temperature sensor. */
+          temperature = am2315.value(AM2315_VAL_TEMP) / 10;
+#endif
+
+      ;
+
+      PRINTF("%u,%u", rh, temperature);
 
       /* Prepare request, TID is set by COAP_BLOCKING_REQUEST(). */
       coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
@@ -140,12 +165,14 @@ PROCESS_THREAD(er_client, ev, data)
                "temperature", temperature);
       /* Set the CoAP payload using the message buffer above. */
       coap_set_payload(request,
-                       (uint8_t *)msg,
+                       (uint8_t *)temp_msg,
                        sizeof(DEVICE_ID)
                        +
                        sizeof(USER_TOKEN)
                        +
-                       sizeof("temperature") + 2);
+                       sizeof("temperature") 
+                       + 
+                       2);
 
       /* Debugging messages. */
       PRINT6ADDR(&server_ipaddr);
