@@ -71,8 +71,8 @@
 /* Path info. */
 #define URL_PATH "/target"
 /* Credentials obtained from the dashboard. */
-#define DEVICE_ID "1f7140cb-7ece-4294-8f23-8a0da0736f35"
-#define USER_TOKEN "Bearer mwVvRmypMg3O5CO6ffx9OzbtmzZFxP8tK2LZYtimjqTecI7k7AjgAqODFhW5nHbp"
+#define DEVICE_ID "<You device ID here>"
+#define USER_TOKEN "<Your user token here>"
 
 PROCESS(er_client, "CoAP Client Workshop");
 AUTOSTART_PROCESSES(&er_client);
