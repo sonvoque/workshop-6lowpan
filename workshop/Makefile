@@ -22,7 +22,14 @@ PROJECT_SOURCEFILES += $(REST_RESOURCES_FILES)
 
 #Add these two lines for workshop purposes
 PROJECTDIRS += ./dev
-PROJECT_SOURCEFILES += hih6130.c
+PROJECT_SOURCEFILES += hih6130.c am2315.c
+
+#Read SENSOR flag
+ifeq ($(SENSOR),am2315)
+CFLAGS += -DAM2315
+else
+CFLAGS += -DHIH6130
+endif
 
 # linker optimizations
 SMALL=1
